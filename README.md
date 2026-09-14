@@ -1,5 +1,7 @@
 # Exantrix seller API
 
+Collection pour [Postman](https://www.postman.com) et spécification [OpenAPI](https://www.openapis.org) (code source officiel : [github.com/OAI/OpenAPI-Specification](https://github.com/OAI/OpenAPI-Specification)) de l'API d'[exantrix.com](https://exantrix.com), site [Django](https://www.djangoproject.com) ([github.com/django/django](https://github.com/django/django)).
+
 Collection Postman et spécification OpenAPI de l'API vendeur de la marketplace [Exantrix](https://exantrix.com) (impression 3D, DTF, textile personnalisé, flocage, découpe).
 
 - **Documentation** : https://exantrix.com/extensions/api (FR) · https://exantrix.com/en/extensions/api (EN)
@@ -40,3 +42,11 @@ def signature_valide(corps_brut: bytes, entete: str, jeton: str) -> bool:
 - [Drupal Commerce](https://github.com/tony-dev-web/exantrix-marketplace-drupal)
 
 Licence MIT.
+
+## Plateformes : sites et sources
+
+| Plateforme | Site officiel | Code source | Documentation développeur |
+|---|---|---|---|
+| Postman | https://www.postman.com | https://github.com/postmanlabs | https://learning.postman.com/docs/ |
+| OpenAPI | https://www.openapis.org | https://github.com/OAI/OpenAPI-Specification | https://spec.openapis.org/oas/v3.0.3 |
+| Django (exantrix.com) | https://www.djangoproject.com | https://github.com/django/django | https://docs.djangoproject.com/ |
