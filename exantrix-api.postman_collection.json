@@ -1,0 +1,390 @@
+{
+  "info": {
+    "_postman_id": "11036249-c40b-4ec2-aa86-25da66cec20a",
+    "name": "Exantrix seller API",
+    "description": "API vendeur Exantrix (JSON, jeton Bearer) : produits, stock, commandes, expedition, webhook signe.\n\nDocumentation : https://exantrix.com/extensions/api (FR) / https://exantrix.com/en/extensions/api (EN).\n\nVariables : base = https://exantrix.com/api/v1, jeton = votre jeton API (espace vendeur, section API).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base",
+      "value": "https://exantrix.com/api/v1"
+    },
+    {
+      "key": "jeton",
+      "value": "VOTRE_JETON"
+    },
+    {
+      "key": "reference",
+      "value": "SKU-001"
+    },
+    {
+      "key": "commande_id",
+      "value": "4821"
+    }
+  ],
+  "item": [
+    {
+      "name": "Compte",
+      "item": [
+        {
+          "name": "Mon compte vendeur",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jeton}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/moi",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "moi"
+              ]
+            },
+            "description": "Statut, autorisation de vente, commission, boutique reliee, URL de webhook."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('vendeur_id present', () => pm.expect(j).to.have.property('vendeur_id'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Produits",
+      "item": [
+        {
+          "name": "Lister mes produits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jeton}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/produits",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "produits"
+              ]
+            },
+            "description": "Produits du vendeur chez Exantrix (reference, prix, stock, visibilite, moderation)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "pm.test('JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Creer ou mettre a jour des produits",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jeton}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/produits",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "produits"
+              ]
+            },
+            "description": "Upsert par reference, 200 fiches max par appel. Les nouveaux produits passent en moderation.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"produits\": [\n    {\n      \"reference\": \"SKU-001\",\n      \"titre\": \"Support casque imprime en 3D\",\n      \"categorie\": \"3d\",\n      \"prix_ttc\": 19.9,\n      \"stock\": 12,\n      \"images\": [\n        \"https://maboutique.fr/img/support.jpg\"\n      ],\n      \"description\": \"Support de casque en PLA, 3 coloris.\",\n      \"information\": \"Impression PLA, 20 cm, fixation murale par 2 vis.\",\n      \"marque\": \"\",\n      \"sous_categorie\": \"\",\n      \"url_boutique\": \"https://maboutique.fr/support-casque\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('produits renvoyes', () => pm.expect(j.produits).to.be.an('array'));",
+                  "pm.test('aucune erreur', () => pm.expect(j.erreurs).to.have.lengthOf(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mettre a jour le stock",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jeton}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/produits/{{reference}}/stock",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "produits",
+                "{{reference}}",
+                "stock"
+              ]
+            },
+            "description": "Stock d'un produit par reference.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stock\": 7\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "pm.test('JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Retirer un produit des listes",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jeton}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/produits/{{reference}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "produits",
+                "{{reference}}"
+              ]
+            },
+            "description": "Stock a 0, sans effacer le produit."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "pm.test('JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Commandes",
+      "item": [
+        {
+          "name": "Commandes payees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jeton}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/commandes?depuis=2026-01-01",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "commandes"
+              ],
+              "query": [
+                {
+                  "key": "depuis",
+                  "value": "2026-01-01"
+                }
+              ]
+            },
+            "description": "Commandes payees contenant vos produits (500 dernieres). Filtre optionnel depuis=AAAA-MM-JJ."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "pm.test('JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Declarer l'expedition",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jeton}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/commandes/{{commande_id}}/expedier",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "commandes",
+                "{{commande_id}}",
+                "expedier"
+              ]
+            },
+            "description": "Passe la commande en EXPEDIEE avec transporteur et numero de suivi.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transporteur\": \"Colissimo\",\n  \"suivi\": \"6A12345678901\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "pm.test('JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Webhook (exemple recu)",
+      "item": [
+        {
+          "name": "Exemple de notification commande.payee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Exantrix-Signature",
+                "value": "sha256=<HMAC-SHA256 hex du corps, cle = jeton>"
+              }
+            ],
+            "url": {
+              "raw": "https://votre-boutique.fr/webhook-exantrix",
+              "host": [
+                "https://votre-boutique.fr"
+              ],
+              "path": [
+                "webhook-exantrix"
+              ]
+            },
+            "description": "Ce que Exantrix envoie a votre URL de notification a chaque commande payee. Verifiez la signature : sha256= + HMAC-SHA256 hexadecimal du corps brut avec votre jeton comme cle.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"evenement\": \"commande.payee\",\n  \"commande\": {\n    \"id\": 4821,\n    \"statut\": \"PAYEE\",\n    \"date\": \"2026-09-13\",\n    \"transporteur\": \"\",\n    \"suivi\": \"\",\n    \"livraison\": {\n      \"nom\": \"Durand\",\n      \"prenom\": \"Marie\",\n      \"adresse\": \"12 rue des Lilas\",\n      \"code_postal\": \"72000\",\n      \"ville\": \"Le Mans\",\n      \"telephone\": \"0600000000\",\n      \"email\": \"marie@example.com\",\n      \"mode\": \"Colissimo\"\n    },\n    \"lignes\": [\n      {\n        \"reference\": \"SKU-001\",\n        \"produit_id\": 9107,\n        \"titre\": \"Support casque imprime en 3D\",\n        \"quantite\": 2,\n        \"prix_ttc\": \"19.90\",\n        \"total_ttc\": \"39.80\",\n        \"couleur\": \"noir\",\n        \"taille\": \"\",\n        \"position\": \"\",\n        \"texte_3d\": \"\",\n        \"renseignement\": \"\"\n      }\n    ],\n    \"total_vendeur_ttc\": \"39.80\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
